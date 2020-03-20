@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="stylesheet" href="style/reset.css">
+      <link rel="stylesheet" href="style/index.css">
+      <title>Rubiks Cube Scrambler</title>
+</head>
+<body>
+      <div id="app" class="container">
+            <div class="settings">
+                  Scramble size:
+                  <select name="moves" id="moves">
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="25" selected>25</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                        <option value="60">60</option>
+                  </select>
+                  Cube size:
+                  <select name="cube" id="cube">
+                        <option value="2">2x2</option>
+                        <option value="3">3x3x3</option>
+                        <option value="4">4x4x4</option>
+                        <option value="5">5x5x5</option>
+                        <option value="6">6x6x6</option>
+                        <option value="7">7x7x7</option>
+                        <option value="8">8x8x8</option>
+                        <option value="9">9x9x9</option>
+                  </select>
+
+                  <button id="scramble">scramble</button>
+                  <button id="reset"> reset </button>
+
+            </div>
+            <div id="mixedMoves" class="mixedmoves"></div>
+            <div id="timer" class="timer"></div>
+            <div class="instructions">
+                  <p>Press spacebar to start timer</p>
+            </div>
+      </div>
+      <script src="index.js"></script>
+</body>
+</html>

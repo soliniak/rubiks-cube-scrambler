@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css?family=Oswald:400,500,600,700&display=swap')
+
+@mixin flex($align-items: center, $justify-content: center, $flex-direction: row)
+      display: flex
+      align-items: $align-items
+      justify-content: $justify-content
+      flex-direction: $flex-direction
+
+body
+      background-color: white
+      @include flex($align-items: flex-start)
+
+.container
+      width: 1150px
+      padding-top: 50px
+      @include flex($flex-direction: column, $align-items: flex-start)
+
+.settings
+      width: 400px
+      @include flex($justify-content: space-between)
+
+.timer
+      font-size: 200px
+      font-family: Oswald
+      font-weight: 600
+      z-index: -10
+.idle
+      opacity: .2
+
+.mixedmoves:not(:empty)
+      background-color: lightblue
+      border-radius: 10px
+      padding: 1rem 2rem
+      font-family: Tahoma
+      font-weight: bold
+      font-size: 20px
+      align-self: center;
+      margin: 3rem
+      line-height: 2rem
