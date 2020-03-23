@@ -5,13 +5,18 @@ const cubeSizeSelect = document.querySelector("#cube")
 
 let cubeRotation = false
 let scrambleLength = 25
-let cubeSize = 3;
+let cubeSize = 3
+let scrambleWithSpace = false
+let sort = 'desc'
+const maxRecordsOnPage = 10
 
 scrambleLengthSelect.addEventListener("change", () => {
       scrambleLength = scrambleLengthSelect.value
 })
+
 cubeSizeSelect.addEventListener("change", () => {
       cubeSize = cubeSizeSelect.value
+      displayRecords(cubeSize, sort, maxRecordsOnPage)
 })
 
 const getRandomSlice = () => Math.floor(Math.random() * (Math.floor(cubeSize/2)-1) + 2)
@@ -50,75 +55,217 @@ const scramble = (scrambleLength, cubeSize) => {
       return scrambledMoves
 }
 
+const generateScramble = () => mixedMoves.innerText = scramble(scrambleLength, cubeSize).join(", ")
+
 scrambleBtn.addEventListener("click", () => {
-      mixedMoves.innerText = scramble(scrambleLength, cubeSize).join(", ")
+      generateScramble()
+      stoper.state = "stop"
 })
 
+generateScramble()
 
-// timer
 
-const timerContainer = document.querySelector("#timer")
-const resetTimer = document.querySelector("#reset")
+// Stoper
 
-const timer = {
+const stoperContainer = document.querySelector("#stoper")
+const resetStoper = document.querySelector("#reset")
+
+const stoper = {
+      msmax: 0,
       ms: 0,
       s: 0,
       m: 0,
       h: 0,
       interval: undefined,
+      state: "stop",
       start: () => {
-            if(!timer.interval) {
-                  timer.interval = setInterval(() => { timer.count() }, 10)
+            if(!stoper.interval) {
+                  stoper.interval = setInterval(() => { stoper.count() }, 10)
             }
       },
       stop: () => {
-            if(timer.interval) {
-                  clearInterval(timer.interval)
-                  timer.interval = undefined;
+            if(stoper.interval) {
+                  clearInterval(stoper.interval)
+                  stoper.interval = undefined;
             }
       },
       reset: () => {
-            timer.ms = 0
-            timer.s = 0
-            timer.m = 0
-            timer.h = 0
-            timer.stop()
-            timer.display()
+            stoper.msmax = 0
+            stoper.ms = 0
+            stoper.s = 0
+            stoper.m = 0
+            stoper.h = 0
+            stoper.stop()
+            stoper.display()
+           
       },
       count: () => {
-            timer.ms++
-            if(timer.ms > 99) {
-                  timer.ms = 0
-                  timer.s++
+            stoper.ms++
+            stoper.msmax++
+            if(stoper.ms > 99) {
+                  stoper.ms = 0
+                  stoper.s++
             }
-            if(timer.s > 59) {
-                  timer.s = 0
-                  timer.m++
+            if(stoper.s > 59) {
+                  stoper.s = 0
+                  stoper.m++
             }
-            if(timer.m > 59) {
-                  timer.m = 0
-                  timer.h++
+            if(stoper.m > 59) {
+                  stoper.m = 0
+                  stoper.h++
             }
-            timer.display()
+            stoper.display()
       },
       display: () => {
-            timerContainer.innerHTML = `<span class=${timer.h ? '' : 'idle'}>${timer.h.toString().padStart(2, "0")}:</span><span class=${timer.m ? '' : 'idle'}>${timer.m.toString().padStart(2, "0")}:</span><span class=${timer.s ? '' : 'idle'}>${timer.s.toString().padStart(2, "0")}:</span>${timer.ms.toString().padStart(3, "0")}`
+            const formatTime = {
+                  wrapper: true, // wrap active/idle element of time with wrapperStart and close with wrapperEnd (recommended not to do so with ms because it goes willy willy fast)
+                  wrapperStart: (wrapMe) => {
+                        return `<span class="${Number(wrapMe) ? '' : 'idle'}">` // set class for active/idle element
+                  },
+                  wrapperEnd: `</span>`,
+                  separator: `:`, // set separator => H(separator)M(separator)S(separator)MS
+                  format: (time, separator) => {
+                        return (formatTime.wrapper ? formatTime.wrapperStart(time) + time + separator + formatTime.wrapperEnd : time + separator)
+                  },
+                  smhFormat: (time) => time.toString().padStart(2, "0"), // seconds, minutes, hours formatted - max to 2 digits followed with "0"
+                  msFormat: (time) => time.toString().padStart(3, "0"), // miliseconds max to 3 digits followed with "0"
+                  get H() { 
+                        // return this.allow(stoper.h) ? this.format(this.smhFormat(stoper.h), this.separator) : "00:"
+                        return this.format(this.smhFormat(stoper.h), this.separator)
+                  },
+                  get M() { 
+                        // return this.allow(stoper.m) ? this.format(this.smhFormat(stoper.m), this.separator) : "00:"
+                        return this.format(this.smhFormat(stoper.m), this.separator)
+                  },
+                  get S() { 
+                        // return this.allow(stoper.s) ? this.format(this.smhFormat(stoper.s), this.separator) : "00:"
+                        return this.format(this.smhFormat(stoper.s), this.separator)
+                  },
+                  get MS() { 
+                        return this.msFormat(stoper.ms)
+                  },
+                  get display() { 
+                        return `${this.H}${this.M}${this.S}${this.MS}`
+                  }
+            }
+
+            stoperContainer.innerHTML = formatTime.display
+      },
+      listener: () => window.addEventListener("keydown", e => {
+            if(e.keyCode === 32) {
+                  e.preventDefault()
+                  if(stoper.state === "start") {
+                        stoper.stop()
+                        stoper.state = "paused"
+                        setStorage(mixedMoves.innerText, stoperContainer.innerText, cubeSize, stoper.msmax)
+                        displayRecords(cubeSize, sort, maxRecordsOnPage)
+                  } else if(stoper.state === "paused") {
+                        stoper.reset()
+                        generateScramble()
+                        stoper.state = "stop"
+                  } else if(stoper.state === "stop") {
+                        stoper.start()
+                        stoper.state = "start"
+                  }
+            }
+      }),
+      init: () => {
+            stoper.listener()
+            stoper.display()
       }
 }
 
-resetTimer.addEventListener("click", () => {
-      timer.reset()
+stoper.init()
+
+resetStoper.addEventListener("click", () => {
+      stoper.reset()
 })
 
 scrambleBtn.addEventListener("click", () => {
-      timer.reset()
+      stoper.reset()
 })
 
-window.addEventListener("keydown", e => {
-      e.preventDefault()
-      if(e.keyCode === 32) {
-            timer.interval ? timer.stop() : timer.start()
+
+// LOCAL STORAGE
+
+const recordsContainer = document.querySelector(".records__container")
+
+const setStorage = (scrambleSequence, time, cubeSizeVar, msMax) => {
+      const id = (localStorage.length + 1) * (Math.floor(Math.random() * 1000000000000))
+      localStorage.setItem(`scrambleSeq${id}`, JSON.stringify([[msMax], [time], [cubeSizeVar], [scrambleSequence]]))
+}
+
+
+const getRecords = () => {
+      const records = []
+
+      for(let i = 0; i <= localStorage.length -1; i++){
+            if(localStorage.key(i).includes("scrambleSeq")){
+                  records.push([localStorage.key(i), JSON.parse(localStorage.getItem(localStorage.key(i)))])
+            }
       }
-})
+      // console.log(records)
+      return records
+}
 
-timer.display()
+const deleteRecord = (record) => {
+      localStorage.removeItem(record)
+      displayRecords(cubeSize, sort, maxRecordsOnPage)
+}
+
+
+const pastScramble = (e) => {
+      e = e || window.event
+      e.target.nextElementSibling.classList.toggle("show")
+}
+
+const displayRecords = (cubeSize, sort, size) => {
+
+      const convertCubeSize = (size) => {
+            sizes = {
+                  2: "2x2",
+                  3: "3x3x3",
+                  4: "4x4x4",
+                  5: "5x5x5",
+                  6: "6x6x6",
+                  7: "7x7x7",
+                  8: "8x8x8",
+                  9: "9x9x9",
+            }
+
+            return sizes[size]
+      }
+
+      let defaultCubeSize = cubeSize || 2
+      let defaultSort = sort || 'desc'
+      let defaultSize = size || 10
+
+      const Records = getRecords()
+ 
+      const recordsTemplate = (record, index) => `
+            <div class="record">
+                  <span class="index">${index + 1}</span>
+                  <span class="record">${record[1][1]}</span>
+                  <button class="delete__record btn" onclick="deleteRecord('${record[0]}')"> delete </button>
+                  <button class="case__scramble btn" onclick="pastScramble()"> pick this scramble </button>
+                  <span class="past__scramble"> ${record[1][3]} </span>
+            </div>
+            `
+
+      recordsContainer.innerHTML = `<h2 class="cube__size">${convertCubeSize(cubeSize)}</h2>`
+      Records
+            .filter((record) => {
+                  return record[1][2] == defaultCubeSize
+            })
+            .sort((a,b) => {
+                  return defaultSort == 'desc' ? a[1][0] - b[1][0] : b[1][0] - a[1][0]
+                  // return a[1][0]-b[1][0]
+            })
+            .filter((record, index) => index < defaultSize)
+            .forEach((record, index) => {                  
+                  recordsContainer.innerHTML += recordsTemplate(record, index)                  
+                  // record + "<br>"
+            })
+}
+
+displayRecords(cubeSize, sort, maxRecordsOnPage)

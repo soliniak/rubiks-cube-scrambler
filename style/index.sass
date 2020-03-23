@@ -16,10 +16,11 @@ body
       @include flex($flex-direction: column, $align-items: flex-start)
 
 .settings
-      width: 400px
       @include flex($justify-content: space-between)
+      *
+            margin-right: 10px
 
-.timer
+.stoper
       font-size: 200px
       font-family: Oswald
       font-weight: 600
@@ -37,3 +38,9 @@ body
       align-self: center;
       margin: 3rem
       line-height: 2rem
+
+.show
+      display: inline !important
+
+.past__scramble
+      display: none

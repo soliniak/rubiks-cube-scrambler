@@ -23,7 +23,7 @@
                   Cube size:
                   <select name="cube" id="cube">
                         <option value="2">2x2</option>
-                        <option value="3">3x3x3</option>
+                        <option value="3" selected>3x3x3</option>
                         <option value="4">4x4x4</option>
                         <option value="5">5x5x5</option>
                         <option value="6">6x6x6</option>
@@ -33,14 +33,15 @@
                   </select>
 
                   <button id="scramble">scramble</button>
-                  <button id="reset"> reset </button>
+                  <button id="reset"> reset timer</button>
 
             </div>
             <div id="mixedMoves" class="mixedmoves"></div>
-            <div id="timer" class="timer"></div>
+            <div id="stoper" class="stoper"></div>
             <div class="instructions">
                   <p>Press spacebar to start timer</p>
             </div>
+            <div class="records__container"></div>
       </div>
       <script src="index.js"></script>
 </body>
