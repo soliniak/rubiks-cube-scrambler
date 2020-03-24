@@ -102,7 +102,6 @@ generateScramble();
 
 
 // LOCAL STORAGE
-
 const recordsContainer = document.querySelector('.records__container');
 
 const convertCubeSize = (sizeCube) => {
@@ -120,62 +119,70 @@ const convertCubeSize = (sizeCube) => {
   return sizes[sizeCube];
 };
 
-const getRecords = () => {
-  const records = [];
-
-  for (let i = 0; i <= localStorage.length - 1; i += 1) {
-    if (localStorage.key(i).includes('scrambleSeq')) {
-      records.push([
-        localStorage.key(i),
-        JSON.parse(localStorage.getItem(localStorage.key(i))),
-      ]);
-    }
-  }
-  return records;
-};
-
-
 const displayRecords = (cubeSizeVar, sortVar, sizeVar) => {
-  const Records = getRecords();
-
-  const deleteRecord = (record) => {
-    localStorage.removeItem(record);
-    displayRecords(cubeSize, sort, maxRecordsOnPage);
+  const getRecords = () => {
+    const records = [];
+    for (let i = 0; i <= localStorage.length - 1; i += 1) {
+      if (localStorage.key(i).includes('scrambleSeq')) {
+        records.push(
+          JSON.parse(localStorage.getItem(localStorage.key(i))),
+        );
+      }
+    }
+    return records;
   };
-  // eslint-disable-next-line no-unused-vars
-  // const pastScramble = (e) => {
-  //   const ev = e || window.event;
-  //   ev.target.nextElementSibling.classList.toggle('show');
-  // };
 
   const recordsTemplate = (record, index) => `
-    <div class='record'><span class='index'>${index + 1}</span>
-    <span class='record'>${record[1][1]}</span>
-    <button class='delete__record btn' onclick='${deleteRecord(record[0])}'> delete </button>
-    <button class='case__scramble btn' onclick='pastScramble()'> preview this scramble </button>
-    <span class='past__scramble'> ${record[1][3]} </span></div>
+    <div class='record'>
+    <span class='index'>${index + 1}</span>
+    <span class='record'>${record.timeT}</span>
+    <button class='delete__record btn' data-id='${record.id}'> delete </button>
+    <button class='case__scramble btn'> preview this scramble </button>
+    <span class='past__scramble'> ${record.scramble} </span></div>
   `;
 
-  // const recordsTemplate = '';
   recordsContainer.innerHTML = `<h2 class='cube__size'>${convertCubeSize(cubeSize)}</h2>`;
-  // console.log(Records[1], cubeSizeVar)
+
+  const Records = getRecords();
   Records
-    .filter((record) => Number(record[1][2]) === Number(cubeSizeVar))
-    .sort((a, b) => (sortVar === 'desc' ? a[1][0] - b[1][0] : b[1][0] - a[1][0]))
+    .filter((record) => Number(record.cubeSize) === Number(cubeSizeVar))
+    .sort((a, b) => (sortVar === 'desc' ? Number(a.timeMS) - Number(b.timeMS) : Number(b.timeMS) - Number(a.timeMS)))
     .filter((record, index) => index < sizeVar)
     .forEach((record, index) => {
       recordsContainer.innerHTML += recordsTemplate(record, index);
     });
+
+
+  const deleteRecordBtns = document.querySelectorAll('.delete__record');
+  deleteRecordBtns.forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      localStorage.removeItem(e.target.dataset.id);
+      displayRecords(cubeSize, sort, maxRecordsOnPage);
+    });
+  });
+
+  const previewScrambleBtns = document.querySelectorAll('.case__scramble');
+  previewScrambleBtns.forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.target.nextElementSibling.classList.toggle('show');
+    });
+  });
 };
 
 const setStorage = (scrambleSequence, time, cubeSizeVar, msMax) => {
-  const id = Math.floor(Math.random() * 1000000000000);
-  const scrambleData = JSON.stringify([[msMax], [time], [cubeSizeVar], [scrambleSequence]]);
-  // const scrambleData = "test";
-  console.log(`scrambleSeq${id}`, scrambleData);
+  const id = `scrambleSeq${Math.floor(Math.random() * 1000000000000)}`;
 
-  window.localStorage.setItem(`scrambleSeq${id}`, scrambleData);
-  // localStorage.setItem(`scrambleSeq${id}`, 'ss');
+  const dataObj = {
+    id,
+    timeMS: msMax,
+    timeT: time,
+    cubeSize: cubeSizeVar,
+    scramble: scrambleSequence,
+  };
+
+  const scrambleData = JSON.stringify(dataObj);
+
+  window.localStorage.setItem(id, scrambleData);
 };
 
 // Stoper
@@ -238,7 +245,7 @@ const stoper = {
       wrapper: true,
       wrapperStart: (wrapMe) => `<span class='${Number(wrapMe) ? '' : 'idle'}'>`,
       wrapperEnd: '</span>',
-      separator: ':', // set separator => H(separator)M(separator)S(separator)MS
+      separator: ':',
       format: (time, separator) => (formatTime.wrapper
         ? formatTime.wrapperStart(time)
           + time
@@ -274,7 +281,6 @@ const stoper = {
       if (stoper.state === 'start') {
         stoper.stop();
         stoper.state = 'paused';
-        console.log(stoper.state);
         setStorage(
           mixedMoves.innerText,
           stoperContainer.innerText,
