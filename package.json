@@ -1,0 +1,31 @@
+{
+  "name": "rubiks-cube-scrambler",
+  "version": "1.0.0",
+  "description": "Rubik's Cube scrambler for speed cubing",
+  "main": "index.js",
+  "scripts": {
+    "test": "Test me"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/soliniak/rubiks-cube-scrambler.git"
+  },
+  "keywords": [
+    "Rubik",
+    "Cube",
+    "Scrambler",
+    "Stoper",
+    "Timer"
+  ],
+  "author": "Rafał Soliński",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/soliniak/rubiks-cube-scrambler/issues"
+  },
+  "homepage": "https://github.com/soliniak/rubiks-cube-scrambler#readme",
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-plugin-import": "^2.20.1"
+  }
+}
